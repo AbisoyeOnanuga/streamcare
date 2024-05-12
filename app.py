@@ -1,55 +1,51 @@
-import os
-import google.generativeai as genai
+import streamlit as st
 from dotenv import load_dotenv
+import os
+import requests
 
-# Load environment variables from .env file
+# Load the environment variables
 load_dotenv()
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
-# Configure the Google API key
-GEMINI_API_KEY = os.getenv('GEMINI_KEY')  # Ensure this is set in your .env file
+# Define a function to call the Gemini API
+def call_gemini_api(patient_data):
+    # Replace 'your_gemini_api_endpoint' with the actual endpoint
+    url = 'your_gemini_api_endpoint'
+    headers = {
+        'Authorization': f'Bearer {GEMINI_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    response = requests.post(url, headers=headers, json=patient_data)
+    return response.json()
 
-# Initialize the Gemini model with the API key
-def initialize_model():
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(
-        'gemini-pro',
-        generation_config=genai.GenerationConfig(
-            max_output_tokens=2000,
-            temperature=0.9,
-        )
-    )
-    return model
+# Streamlit app layout
+st.title('Personalized Primary Care App')
 
-# Sample cancer medication list for a given patient (replace with actual data)
-medication_list = [
-    {"name": "Tamoxifen", "dosage": "20mg", "frequency": "Once a day"},
-    {"name": "Methotrexate", "dosage": "2.5mg", "frequency": "Once a week"},
-    {"name": "Cisplatin", "dosage": "75mg/m2", "frequency": "Every 3 weeks"}
-]
+# Input fields for patient data
+with st.form(key='patient_form'):
+    side_effects_notes = st.text_area('Side Effects Notes')
+    medication_list = st.text_input('Medication List')
+    medical_condition = st.text_input('Medical Condition')
+    submit_button = st.form_submit_button(label='Submit')
 
-# Sample side effects note (replace with actual data)
-side_effects_note = "Patient reports experiencing mild nausea and occasional dizziness, particularly after the last chemotherapy session."
+# When the submit button is pressed
+if submit_button:
+    patient_data = {
+        'side_effects_notes': side_effects_notes,
+        'medication_list': medication_list,
+        'medical_condition': medical_condition
+    }
+    
+    # Call the Gemini API or any other AI model API
+    results = call_gemini_api(patient_data)
+    
+    # Display the results
+    st.write('Results:')
+    st.json(results)
 
-# Craft a detailed prompt for analyzing the patient's medication list and side effects
-prompt = (
-    "As an AI trained in pharmacology, analyze the potential drug-related causes of side effects based on the patient's medication list. "
-    f"Medications: {medication_list}. Reported side effects: {side_effects_note}. "
-    "Provide detailed insights that can aid healthcare professionals in making informed treatment decisions."
-)
+# Modular AI model API endpoint
+AI_MODEL_ENDPOINT = os.getenv('AI_MODEL_ENDPOINT', 'your_default_ai_api_endpoint')
 
-# Function to analyze the patient's medication list and side effects
-def analyze_patient_note(prompt):
-    try:
-        model = initialize_model()
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-# Example usage
-response = analyze_patient_note(prompt)
-if response:
-    print(response)
-else:
-    print("No response generated.")
+# You can switch the AI model by changing the environment variable
+# For example, in your .env file, you can have:
+# AI_MODEL_ENDPOINT=your_other_ai_api_endpoint
