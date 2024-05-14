@@ -40,7 +40,7 @@ def analyze_patient_data(medication_list, side_effects_notes, medical_condition)
         return None
 
 # Streamlit app layout
-st.title('Streamcare: AI + Data personalised care')
+st.title('Streamcare: AI ✨+ Data 📊 personalised care')
 
 # Input fields for patient data
 with st.form(key='patient_form'):
