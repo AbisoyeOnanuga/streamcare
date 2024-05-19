@@ -17,6 +17,9 @@ Run the app locally with:
 
 ```streamlit run app.py```
 
+Run the app locally in debug mode with:
+```streamlit run app.py --logger.level debug```
+
 ## Configuration
 Set your API keys in the `.env` file or as environment variables:
 
