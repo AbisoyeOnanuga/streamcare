@@ -6,10 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Retrieve the API token from the environment variable
-REPLICATE_API_KEY = os.getenv('REPLICATE_API_KEY')
+REPLICATE_API_TOKEN = os.getenv('REPLICATE_API_TOKEN')
 
 # Initialize the Replicate model with the API key
-client = replicate.Client(api_token=REPLICATE_API_KEY)
+client = replicate.Client(replicate_api_token=REPLICATE_API_TOKEN)
 
 medications = "Aspirin, Metformin"
 side_effects = "Nausea, dizziness"

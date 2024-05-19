@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Retrieve the API token from the environment variable
-REPLICATE_API_KEY = os.getenv('REPLICATE_API_KEY')
+REPLICATE_API_TOKEN = os.getenv('REPLICATE_API_TOKEN')
 
 # Initialize the Replicate model with the API key
 def initialize_model():
-    return replicate.Client(api_token=REPLICATE_API_KEY)
+    return replicate.Client(api_token=REPLICATE_API_TOKEN)
 
 # Function to get a response from the snowflake-arctic-instruct model
 def get_model_response(medications, side_effects, medical_condition):
@@ -30,7 +30,7 @@ def get_model_response(medications, side_effects, medical_condition):
     try:
         client = initialize_model()
         output = ""
-        for event in client.run(
+        for event in client.stream(
             "snowflake/snowflake-arctic-instruct",
             input=input
         ):
