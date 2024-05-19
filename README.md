@@ -23,10 +23,10 @@ Run the app locally in debug mode with:
 ## Configuration
 Set your API keys in the `.env` file or as environment variables:
 
-```GEMINI_KEY=your_gemini_api_key```
+```REPLICATE_API_TOKEN=your_replicate_api_token```
 
 ## AI Model Integration
-Streamcare uses the `replicate` package to interact with the s`nowflake/snowflake-arctic-instruct` model for generating medical insights.
+Streamcare uses the `replicate` package to interact with the `snowflake/snowflake-arctic-instruct` model for generating medical insights.
 
 ## Deployment
 Deploy Streamcare on Streamlit Cloud by following the instructions in DEPLOYMENT.md.
