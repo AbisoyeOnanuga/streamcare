@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import logging
 from datetime import datetime
 import random
+import time
 
 # configure logging
 logging.basicConfig(
@@ -84,9 +85,11 @@ def process_synthetic_cases(synthetic_cases, model_name, test_type):
             # Call the model and collect the output
             for event in client.stream(model_name, input={'prompt': input_prompt, 'temperature': 0.2}):
                 if hasattr(event, 'data') and event.data.strip():
+                    # Check for and remove any trailing empty dictionary representations
+                    cleaned_output = event.data.strip().rstrip('{}')
                     # Append non-empty model output to the list
-                    model_outputs.append(event.data)
-                    print(event.data)  # Print each part of the model output as it is streamed
+                    model_outputs.append(cleaned_output)
+                    print(cleaned_output)  # Print each part of the model output as it is streamed
                     relevant_information_generated = True
         except Exception as e:
             print(f"An error occurred while streaming: {e}")
@@ -103,6 +106,20 @@ def process_synthetic_cases(synthetic_cases, model_name, test_type):
 # Call the function with the synthetic cases and the model name
 model_name = "snowflake/snowflake-arctic-instruct"  # Replace with the actual model name
 
+# Function to handle streaming with retries
+def stream_with_retries(model_name, input_data, max_retries=3, backoff_factor=1):
+    for _ in range(max_retries):
+        try:
+            # Attempt to stream the response from the model
+            for event in client.stream(model_name, input=input_data):
+                if hasattr(event, 'data') and event.data.strip():
+                    yield event.data  # Yield each part of the model output as it is streamed
+            break  # If successful, break out of the retry loop
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            time.sleep(backoff_factor)  # Wait before retrying
+            backoff_factor *= 2  # Exponential backoff
+
 # Main application logic
 if TESTING_MODE:
     test_type = 'Synthetic'
@@ -111,22 +128,27 @@ if TESTING_MODE:
 else:
     test_type = 'User'
     medications, side_effects, medical_condition = get_user_input()
-    user_input_prompt = (
-        f"As an AI trained in pharmacology, analyze the potential drug-related causes of side effects and the "
-        f"impact of the patient's medical condition on their treatment. Medications: {medications}. Reported "
-        f"side effects: {side_effects}. Medical condition: {medical_condition}. Provide detailed insights that "
-        f"can aid healthcare professionals in making informed treatment decisions."
-    )
+    user_input_prompt = {
+        'prompt': (
+            f"As an AI trained in pharmacology, analyze the potential drug-related causes of side effects and the "
+            f"impact of the patient's medical condition on their treatment. Medications: {medications}. Reported "
+            f"side effects: {side_effects}. Medical condition: {medical_condition}. Provide detailed insights that "
+            f"can aid healthcare professionals in making informed treatment decisions."
+        ),
+        'temperature': 0.2
+    }
     model_outputs = []
     relevant_information_generated = False
 
     # Collecting model outputs
-    for event in replicate.stream(model_name, input={'prompt': user_input_prompt, 'temperature': 0.2}):
+    for event in replicate.stream(model_name, input=user_input_prompt):
         if hasattr(event, 'data'):
             model_output = event.data
             if model_output.strip():
-                model_outputs.append(model_output)  # Append to the list
-                print(model_output, end='')  # Print each part of the model output as it is streamed
+                # Check for and remove any trailing empty dictionary representations
+                cleaned_output = model_output.strip().rstrip('{}')
+                model_outputs.append(cleaned_output)  # Append to the list
+                print(cleaned_output, end='')  # Print each part of the model output as it is streamed
                 relevant_information_generated = True
 
     if not relevant_information_generated:
@@ -134,3 +156,4 @@ else:
 
     # Log the performance after collecting all outputs
     log_performance(test_type, model_name, {'medications': medications, 'side_effects': side_effects, 'medical_condition': medical_condition}, model_outputs, test_count)
+    
