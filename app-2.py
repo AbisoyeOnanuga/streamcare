@@ -6,35 +6,46 @@ from datetime import datetime
 import random
 import time
 
-# configure logging
-logging.basicConfig(
-    filename='arctic-instruct_performance.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Create a custom logger for the Arctic Instruct performance
+arctic_logger = logging.getLogger('arctic_instruct')
+arctic_logger.setLevel(logging.INFO)
+# Create handlers for the Arctic Instruct logger
+arctic_file_handler = logging.FileHandler('arctic-instruct_performance.log')
+arctic_file_handler.setLevel(logging.INFO)
+# Create formatters and add it to handlers
+arctic_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+arctic_file_handler.setFormatter(arctic_format)
+# Add handlers to the logger
+arctic_logger.addHandler(arctic_file_handler)
 
-logging.basicConfig(
-    filename='training_sim.log', 
-    level=logging.INFO, 
-    format='%(asctime)s:%(levelname)s:%(message)s'
-)
+# Create a custom logger for the training simulation
+training_logger = logging.getLogger('training_sim')
+training_logger.setLevel(logging.INFO)
+# Create handlers for the training simulation logger
+training_file_handler = logging.FileHandler('training_sim.log')
+training_file_handler.setLevel(logging.INFO)
+# Create formatters and add it to handlers
+training_format = logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
+training_file_handler.setFormatter(training_format)
+# Add handlers to the logger
+training_logger.addHandler(training_file_handler)
 
-# Initialize test count
-test_count = 0
-
-# Function to log performance with timestamp and test iteration
+# Function to log performance for Arctic Instruct
 def log_performance(test_type, model_name, input_data, model_outputs, test_count):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     log_message = f"Test Type: {test_type} | Model: {model_name} | Test #{test_count} | Timestamp: {timestamp} | Input: {input_data} | Output: {model_outputs}"
-    logging.info(log_message)
+    arctic_logger.info(log_message)
 
+# Function to log performance for training simulation
 def training_log_performance(test_type, model_name, input_data, model_outputs, test_count):
-    # Log the basic information
-    logging.info(f"Test Type: {test_type}")
-    logging.info(f"Model: {model_name}")
-    logging.info(f"Test Count: {test_count}")
-    logging.info(f"Input Data: {input_data}")
-    logging.info(f"Model Outputs: {model_outputs}")
+    training_logger.info(f"Test Type: {test_type}")
+    training_logger.info(f"Model: {model_name}")
+    training_logger.info(f"Test Count: {test_count}")
+    training_logger.info(f"Input Data: {input_data}")
+    training_logger.info(f"Model Outputs: {model_outputs}")
+
+# Initialize test count
+test_count = 0
 
 # Extended lists for synthetic data generation
 medications_list = ['Aspirin', 'Metformin', 'Lisinopril', 'Atorvastatin', 'Simvastatin', 'Levothyroxine']
@@ -161,7 +172,7 @@ def ai_feedback_on_user_input(user_diagnosis, user_treatment_plan, scenario):
         for event in client.stream(model_name, input={'prompt': ai_feedback_prompt, 'temperature': 0.2}):
             if hasattr(event, 'data') and event.data.strip():
                 # Append non-empty model output to the list
-                ai_feedback_outputs.append(event.data.strip())
+                ai_feedback_outputs.append(event.data.strip().rstrip('{}'))
     except Exception as e:
         print(f"An error occurred while streaming: {e}")
         ai_feedback_outputs.append(f"An error occurred: {e}")
