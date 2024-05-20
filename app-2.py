@@ -13,6 +13,12 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+logging.basicConfig(
+    filename='training_sim.log', 
+    level=logging.INFO, 
+    format='%(asctime)s:%(levelname)s:%(message)s'
+)
+
 # Initialize test count
 test_count = 0
 
@@ -21,6 +27,14 @@ def log_performance(test_type, model_name, input_data, model_outputs, test_count
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     log_message = f"Test Type: {test_type} | Model: {model_name} | Test #{test_count} | Timestamp: {timestamp} | Input: {input_data} | Output: {model_outputs}"
     logging.info(log_message)
+
+def training_log_performance(test_type, model_name, input_data, model_outputs, test_count):
+    # Log the basic information
+    logging.info(f"Test Type: {test_type}")
+    logging.info(f"Model: {model_name}")
+    logging.info(f"Test Count: {test_count}")
+    logging.info(f"Input Data: {input_data}")
+    logging.info(f"Model Outputs: {model_outputs}")
 
 # Extended lists for synthetic data generation
 medications_list = ['Aspirin', 'Metformin', 'Lisinopril', 'Atorvastatin', 'Simvastatin', 'Levothyroxine']
@@ -60,6 +74,7 @@ def get_user_input():
 
 # Flag to switch between testing mode and user interaction mode
 TESTING_MODE = False  # Set to False for user interaction mode
+TRAINING_SIMULATION_MODE = True
 
 # Function to process each synthetic case
 def process_synthetic_cases(synthetic_cases, model_name, test_type):
@@ -120,11 +135,62 @@ def stream_with_retries(model_name, input_data, max_retries=3, backoff_factor=1)
             time.sleep(backoff_factor)  # Wait before retrying
             backoff_factor *= 2  # Exponential backoff
 
+# Function to interact with the user and collect their diagnosis and treatment plan
+def user_diagnosis_and_treatment():
+    user_diagnosis = input("Enter your diagnosis: ")
+    user_treatment_plan = input("Enter your suggested treatment plan: ")
+    return user_diagnosis, user_treatment_plan
+
+# Function to provide AI feedback on the user's input
+def ai_feedback_on_user_input(user_diagnosis, user_treatment_plan, scenario):
+    # Construct the prompt for AI feedback
+    ai_feedback_prompt = (
+        f"User Diagnosis: {user_diagnosis}\n"
+        f"User Treatment Plan: {user_treatment_plan}\n"
+        f"Please provide feedback and additional insights based on the user's input and the following patient information:\n"
+        f"Medications: {scenario['medications']}\n"
+        f"Reported Side Effects: {scenario['side_effects']}\n"
+        f"Medical Condition: {scenario['medical_condition']}\n"
+    )
+
+    # Initialize an empty list to store AI feedback
+    ai_feedback_outputs = []
+
+    try:
+        # Call the model and collect the output
+        for event in client.stream(model_name, input={'prompt': ai_feedback_prompt, 'temperature': 0.2}):
+            if hasattr(event, 'data') and event.data.strip():
+                # Append non-empty model output to the list
+                ai_feedback_outputs.append(event.data.strip())
+    except Exception as e:
+        print(f"An error occurred while streaming: {e}")
+        ai_feedback_outputs.append(f"An error occurred: {e}")
+
+    # Combine all parts of the AI feedback into one string
+    ai_feedback = ' '.join(ai_feedback_outputs)
+    return ai_feedback
+
+# Define the training simulation function
+def run_training_simulation(model_name, num_cases=3):
+    synthetic_cases = generate_synthetic_data(num_cases)
+    global test_count
+    for case in synthetic_cases:
+        test_count += 1  # Increment test count for each case
+        print("Simulated Patient Scenario:", case)
+        user_diagnosis, user_treatment_plan = user_diagnosis_and_treatment()
+        ai_feedback = ai_feedback_on_user_input(user_diagnosis, user_treatment_plan, case)
+        print("AI Feedback:", ai_feedback)
+        # Log the performance for the current case
+        training_log_performance('Training-simulation', model_name, case, ai_feedback, test_count)
+
 # Main application logic
 if TESTING_MODE:
     test_type = 'Synthetic'
     synthetic_cases = generate_synthetic_data(num_cases=50)
     process_synthetic_cases(synthetic_cases, model_name, test_type)
+elif TRAINING_SIMULATION_MODE:
+    test_type = 'Training-simulation'
+    run_training_simulation(model_name, num_cases=3)
 else:
     test_type = 'User'
     medications, side_effects, medical_condition = get_user_input()
