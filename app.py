@@ -1,62 +1,39 @@
-import replicate
 import streamlit as st
-import os
-from dotenv import load_dotenv
+import replicate
 
-# Load environment variables from .env file
-load_dotenv()
+# Initialize the Replicate client with your API token
+client = replicate.Client(api_token="your_replicate_api_token")
 
-# Retrieve the API token from the environment variable
-REPLICATE_API_TOKEN = os.getenv('REPLICATE_API_TOKEN')
+# Streamlit app title
+st.title("LLM Pharmacology Analysis App")
 
-# Initialize the Replicate model with the API key
-def initialize_model():
-    return replicate.Client(api_token=REPLICATE_API_TOKEN)
+# Input fields for user input
+medications = st.text_input("Medications", "Aspirin, Metformin")
+side_effects = st.text_input("Side Effects", "Nausea, dizziness")
+medical_condition = st.text_input("Medical Condition", "Type 2 Diabetes")
 
-# Function to get a response from the snowflake-arctic-instruct model
-def get_model_response(medications, side_effects, medical_condition):
-    input = {
-        "prompt": (
-            f"As an AI trained in pharmacology, analyze the potential drug-related causes of side effects and the "
-            f"impact of the patient's medical condition on their treatment. Medications: {medications}. Reported "
-            f"side effects: {side_effects}. Medical condition: {medical_condition}. Provide detailed insights that "
-            f"can aid healthcare professionals in making informed treatment decisions."
-        ),
-        "temperature": 0.2
-    }
-    
-    st.write("Sending the following input to the model:", input)  # Debug print
-    
-    try:
-        client = initialize_model()
-        output = ""
-        for event in client.stream(
-            "snowflake/snowflake-arctic-instruct",
-            input=input
-        ):
-            if 'output' in event:
-                output += event['output']
-        return output
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        st.error("Exception type: " + str(type(e)))
-        st.error("Exception args: " + str(e.args))
-        return None
-
-# Streamlit app layout
-st.title('Patient Data Analysis')
-
-# Input fields for the model
-medications = st.text_input('List of medications')
-side_effects = st.text_area('Description of side effects')
-medical_condition = st.text_input('Medical condition')
-
-# When the 'Analyze' button is pressed
+# Button to send the input to the API and display the response
 if st.button('Analyze'):
-    response = get_model_response(medications, side_effects, medical_condition)
-    
-    # Display the response
-    if response:
-        st.write(response)
-    else:
-        st.error("No response generated or an error occurred.")
+    with st.spinner('Analyzing... Please wait.'):
+        # Prepare the input for the API call
+        input = {
+            "prompt": (
+                f"As an AI trained in pharmacology, analyze the potential drug-related causes of side effects and the "
+                f"impact of the patient's medical condition on their treatment. Medications: {medications}. Reported "
+                f"side effects: {side_effects}. Medical condition: {medical_condition}. Provide detailed insights that "
+                f"can aid healthcare professionals in making informed treatment decisions."
+            ),
+            "temperature": 0.2,
+            "max_tokens": 150  # Adjust the number of tokens as needed
+        }
+
+        # API call to generate the analysis
+        response = client.stream("snowflake/snowflake-arctic-instruct", input)
+        
+        # Display the analysis
+        if 'output' in response:
+            st.success('Analysis complete:')
+            st.write(response['output'])
+        else:
+            # If 'output' is not in response, it might be an error or status message
+            st.error(f"Error or status message received: {response}")
