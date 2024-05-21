@@ -4,7 +4,7 @@ from carecli import (generate_synthetic_data, get_user_input, process_synthetic_
 
 # Initialize the Streamlit app
 def main():
-    st.title('Medical AI Assistant')
+    st.title('Streamcare: Medical AI Assistant')
 
     # Sidebar for mode selection
     mode = st.sidebar.selectbox("Select Mode:", ['User Interaction', 'Training Simulation'])
