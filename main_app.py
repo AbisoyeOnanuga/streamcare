@@ -36,12 +36,11 @@ def main():
                 st.success('Synthetic tests complete!')
 
     elif mode == "Training Simulation":
-        # Training simulation mode
         st.subheader('Training Simulation Mode')
         num_cases = st.number_input('Number of training cases:', min_value=1, value=3)
         if st.button('Run Training Simulation'):
             with st.spinner('Running training simulation...'):
-                run_training_simulation(num_cases)
+                run_training_simulation(client, model_name, num_cases, st)
                 st.success('Training simulation complete!')
 
     elif mode == "User Interaction":
