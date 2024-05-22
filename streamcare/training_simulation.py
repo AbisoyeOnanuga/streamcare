@@ -1,4 +1,16 @@
-from utils import setup_logging
+import os
+import replicate
+from dotenv import load_dotenv
+from utils import setup_logging, generate_synthetic_data, user_diagnosis_and_treatment, ai_feedback_on_user_input, training_log_performance
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve the API token from the environment variable
+REPLICATE_API_TOKEN = os.getenv('REPLICATE_API_TOKEN')
+
+# Initialize the Replicate model with the API key
+client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 
 def run_training_simulation(model_name, num_cases):
     synthetic_cases = generate_synthetic_data(num_cases)
