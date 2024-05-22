@@ -1,4 +1,4 @@
-# streamcare
+# Streamcare
 Streamcare is a cutting-edge application designed to revolutionize primary care by leveraging AI to personalize patient treatment plans.
 
 ## Installation
