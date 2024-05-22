@@ -85,7 +85,7 @@ def get_user_input():
 
 # Flag to switch between testing mode and user interaction mode
 TESTING_MODE = False  # Set to False for user interaction mode
-TRAINING_SIMULATION_MODE = True
+TRAINING_SIMULATION_MODE = False
 
 # Function to process each synthetic case
 def process_synthetic_cases(synthetic_cases, model_name, test_type):
@@ -197,7 +197,7 @@ def run_training_simulation(model_name, num_cases=3):
 # Main application logic
 if TESTING_MODE:
     test_type = 'Synthetic'
-    synthetic_cases = generate_synthetic_data(num_cases=50)
+    synthetic_cases = generate_synthetic_data(num_cases=25)
     process_synthetic_cases(synthetic_cases, model_name, test_type)
 elif TRAINING_SIMULATION_MODE:
     test_type = 'Training-simulation'
