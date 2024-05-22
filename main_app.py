@@ -2,9 +2,9 @@ import os
 import replicate
 from dotenv import load_dotenv
 import streamlit as st
-from streamcare.synthetic_test import run_synthetic_test
-from streamcare.training_simulation import run_training_simulation
-from streamcare.user_interaction import run_user_interaction
+from synthetic_test import run_synthetic_test
+from training_simulation import run_training_simulation
+from user_interaction import run_user_interaction
 
 
 # Load environment variables from .env file
