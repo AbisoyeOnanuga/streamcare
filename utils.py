@@ -82,7 +82,7 @@ def stream_with_retries(model_name, input_data, max_retries=3, backoff_factor=1)
         try:
             # Attempt to stream the response from the model
             for event in client.stream(model_name, input=input_data):
-                if hasattr(event, 'data') and event.data.strip():
+                if hasattr(event, 'data') and event.data.strip().rstrip('{}'):
                     yield event.data  # Yield each part of the model output as it is streamed
             break  # If successful, break out of the retry loop
         except Exception as e:

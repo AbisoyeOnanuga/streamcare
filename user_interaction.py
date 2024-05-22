@@ -1,7 +1,7 @@
 import os
 import replicate
 from dotenv import load_dotenv
-from utils import log_performance
+from utils import log_performance, stream_with_retries
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,7 +15,9 @@ client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 model_name = "snowflake/snowflake-arctic-instruct"
 
 def run_user_interaction(medications, side_effects, medical_condition, model_name):
-    global test_count
+    global test_count    
+    test_count = 0  # initialize test count management
+    test_count += 1
     test_type = 'User'
     user_input_prompt = {
         'prompt': (
@@ -30,7 +32,7 @@ def run_user_interaction(medications, side_effects, medical_condition, model_nam
     relevant_information_generated = False
 
     # Collecting model outputs
-    for event in client.stream(model_name, input=user_input_prompt):
+    for event in stream_with_retries(model_name, input=user_input_prompt):
         if hasattr(event, 'data'):
             model_output = event.data
             if model_output.strip():
@@ -47,8 +49,7 @@ def run_user_interaction(medications, side_effects, medical_condition, model_nam
 
     # Log the performance after collecting all outputs
     # Assuming test_count is managed elsewhere or refactored to work within Streamlit
-    test_count = 0  # initialize test count management
-    test_count += 1
+
     log_performance(test_type, model_name, {'medications': medications, 'side_effects': side_effects, 'medical_condition': medical_condition}, full_ai_response, test_count)
     
     return model_outputs
