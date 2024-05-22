@@ -1,13 +1,14 @@
 import os
 import replicate
 from dotenv import load_dotenv
+from utils import setup_logging
 import streamlit as st
 from synthetic_test import run_synthetic_test
 from training_simulation import run_training_simulation
 from user_interaction import run_user_interaction
 
+setup_logging()
 
-# Load environment variables from .env file
 load_dotenv()
 
 # Retrieve the API token from the environment variable
@@ -21,7 +22,7 @@ model_name = "snowflake/snowflake-arctic-instruct"
 
 # Initialize the Streamlit app
 def main():
-    st.title('Medical AI Assistant')
+    st.title('Streamcare: Streamlit and Snowflake Arctic Instruct  on Replicate AI Medical AI Assistant')
 
     # Sidebar for mode selection
     mode = st.sidebar.radio("Choose the mode:", ["Synthetic Test", "Training Simulation", "User Interaction"])
@@ -29,7 +30,7 @@ def main():
     if mode == "Synthetic Test":
         # Synthetic test mode
         st.subheader('Synthetic Test Mode')
-        num_cases = st.number_input('Number of synthetic cases:', min_value=1, value=25)
+        num_cases = st.slider('Number of synthetic cases:', min_value=1, value=25)
         if st.button('Run Synthetic Test'):
             with st.spinner('Running synthetic tests...'):
                 run_synthetic_test(num_cases)
@@ -37,7 +38,7 @@ def main():
 
     elif mode == "Training Simulation":
         st.subheader('Training Simulation Mode')
-        num_cases = st.number_input('Number of training cases:', min_value=1, value=3)
+        num_cases = st.slider('Number of training cases:', min_value=1, value=3)
         if st.button('Run Training Simulation'):
             with st.spinner('Running training simulation...'):
                 run_training_simulation(client, model_name, num_cases, st)
