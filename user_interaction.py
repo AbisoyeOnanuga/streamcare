@@ -32,7 +32,7 @@ def run_user_interaction(medications, side_effects, medical_condition, model_nam
     relevant_information_generated = False
 
     # Collecting model outputs
-    for event in stream_with_retries(model_name, input=user_input_prompt):
+    for event in stream_with_retries(model_name, {'prompt':user_input_prompt, 'temperature': 0.2}):
         if hasattr(event, 'data'):
             model_output = event.data
             if model_output.strip():
