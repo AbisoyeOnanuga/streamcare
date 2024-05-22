@@ -1,7 +1,7 @@
 import os
 import replicate
 from dotenv import load_dotenv
-from utils import setup_logging, generate_synthetic_data, user_diagnosis_and_treatment, ai_feedback_on_user_input, training_log_performance
+from utils import generate_synthetic_data, user_diagnosis_and_treatment, ai_feedback_on_user_input, training_log_performance, stream_with_retries
 
 # Load environment variables from .env file
 load_dotenv()
