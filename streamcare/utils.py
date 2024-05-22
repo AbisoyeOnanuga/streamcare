@@ -1,3 +1,7 @@
+import replicate
+import os
+import time
+from dotenv import load_dotenv
 import logging
 from datetime import datetime
 import random
@@ -59,3 +63,29 @@ def generate_synthetic_data(num_cases=10):
         }
         synthetic_data.append(combo)
     return synthetic_data
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve the API token from the environment variable
+REPLICATE_API_TOKEN = os.getenv('REPLICATE_API_TOKEN')
+
+# Initialize the Replicate model with the API key
+client = replicate.Client(api_token=REPLICATE_API_TOKEN)
+
+# Define your model_name here (e.g., from a config file or another environment variable)
+model_name = "snowflake/snowflake-arctic-instruct"
+
+# Function to handle streaming with retries
+def stream_with_retries(model_name, input_data, max_retries=3, backoff_factor=1):
+    for _ in range(max_retries):
+        try:
+            # Attempt to stream the response from the model
+            for event in client.stream(model_name, input=input_data):
+                if hasattr(event, 'data') and event.data.strip():
+                    yield event.data  # Yield each part of the model output as it is streamed
+            break  # If successful, break out of the retry loop
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            time.sleep(backoff_factor)  # Wait before retrying
+            backoff_factor *= 2  # Exponential backoff
