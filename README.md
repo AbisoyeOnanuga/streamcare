@@ -15,10 +15,10 @@ pip install replicate  # Install the Replicate package
 ## Usage
 Run the app locally with:
 
-```streamlit run app.py```
+```streamlit run main_app.py```
 
 Run the app locally in debug mode with:
-```streamlit run app.py --logger.level debug```
+```streamlit run main_app.py --logger.level debug```
 
 ## Configuration
 Set your API keys in the `.env` file or as environment variables:
