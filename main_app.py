@@ -60,18 +60,11 @@ def main():
         if run_simulation_button:
             with st.spinner('Running training simulation...'):
                 # Call the run_training_simulation function from the training_simulation.py module
-                run_training_simulation(client, model_name, num_cases, st)
-                st.success('Training simulation complete!')
+                run_training_simulation(num_cases, st, model_name)
 
         if st.button('Start New Training Simulation'):
-            # Clear session state for a new simulation
-            clear_session_state()
-
-        def clear_session_state():
-            # Function to clear session state
-            for key in list(st.session_state.keys()):
-                if 'diagnosis_' in key or 'treatment_' in key or 'ai_feedback_' in key:
-                    del st.session_state[key]
+            # Clear the UI for a new session
+            st.experimental_rerun()
 
     elif mode == "Patient Diagnosis":
         st.subheader('Patient Diagnosis Mode')
