@@ -14,7 +14,7 @@ client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 
 model_name = "snowflake/snowflake-arctic-instruct"
 
-def run_synthetic_test(num_cases):
+def run_synthetic_test(num_cases, st):
     synthetic_cases = generate_synthetic_data(num_cases)
     test_type = 'Synthetic'
     global test_count
@@ -39,5 +39,12 @@ def run_synthetic_test(num_cases):
         )
         # Use the retry function to handle model streaming
         model_outputs = list(stream_with_retries(model_name, {'prompt': input_prompt, 'temperature': 0.2}))
+        ai_feedback = ' '.join(model_outputs).replace('  ', ' ')  # Remove extra spaces
+        st.session_state.ai_responses.append(ai_feedback)  # Store AI feedback in session state
+
+        # Display the synthetic case and AI feedback in Streamlit
+        st.json(case)  # Display the case as JSON
+        st.markdown("AI Feedback:")
+        st.markdown(ai_feedback)  # Display the AI feedback        
         # Log the performance for the current case
         log_performance(test_type, model_name, input_data, model_outputs, test_count)
