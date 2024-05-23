@@ -31,10 +31,14 @@ def run_synthetic_test(num_cases, st):
             f"**Medications**: {case['medications']}\n"
             f"**Reported Side Effects**: {case['side_effects']}\n"
             f"**Medical Condition**: {case['medical_condition']}\n\n"
-            f"**AI-Insights**:\n"
-            f"Generate a statistical analysis of the likelihood of the side effects being related to the medications "
+            f"**Statistical Analysis**:\n"
+            f"- There is a **[analyse probability]%** likelihood that the side effects are related to **{case['medications']}**.\n\n"
             f"**Actionable Steps**:\n"
-            f"and suggest any potential adjustments to the medications treatment plan."
+            f"- Succinctly suggest adjustment to the **dosage of {case['medications']}**.\n"
+            f"- Succinctly suggest a **monitoring duration** based on {case['side_effects']} and {case['medical_condition']}.\n\n"
+            f"- Succinctly suggest any potential adjustments to the medications treatment plan.\n"
+            f"Please review these suggestions with a healthcare professional."
+            f"generate a response following the above pattern in markdown"
         )
         # Use the retry function to handle model streaming
         model_outputs = list(stream_with_retries(model_name, {'prompt': input_prompt, 'temperature': 0.2}))

@@ -13,41 +13,74 @@ REPLICATE_API_TOKEN = os.getenv('REPLICATE_API_TOKEN')
 # Initialize the Replicate model with the API key
 client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 
+model_name = "snowflake/snowflake-arctic-instruct"
+
 def run_training_simulation(client, model_name, num_cases, st):
     synthetic_cases = generate_synthetic_data(num_cases)
     global test_count
     test_count = 0  # Initialize test count
 
-    for case in synthetic_cases:
+    # Limit the number of cases to 10
+    synthetic_cases = synthetic_cases[:10]
+
+    for case_index, case in enumerate(synthetic_cases):
         test_count += 1  # Increment test count for each case
         st.write("Simulated Patient Scenario:", case)
 
-        # Streamlit UI for user input
-        user_diagnosis = st.text_input("Enter your diagnosis:", key=f"diagnosis_{test_count}")
-        user_treatment_plan = st.text_input("Enter your suggested treatment plan:", key=f"treatment_{test_count}")
+        # Initialize session state for user inputs if not already present
+        diagnosis_key = f"diagnosis_{case_index}"
+        treatment_key = f"treatment_{case_index}"
+        feedback_key = f"ai_feedback_{case_index}"
 
-        # Construct the prompt for AI feedback
-        ai_feedback_prompt = (
-            f"User Diagnosis: {user_diagnosis}\n"
-            f"User Treatment Plan: {user_treatment_plan}\n"
-            f"Please provide feedback and additional insights based on the user's input and the following patient information:\n"
-            f"Medications: {case['medications']}\n"
-            f"Reported Side Effects: {case['side_effects']}\n"
-            f"Medical Condition: {case['medical_condition']}\n"
-        )
+        if diagnosis_key not in st.session_state:
+            st.session_state[diagnosis_key] = ""
+        if treatment_key not in st.session_state:
+            st.session_state[treatment_key] = ""
+        if feedback_key not in st.session_state:
+            st.session_state[feedback_key] = ""
 
-        # Use the retry function to handle model streaming
-        ai_feedback_outputs = list(stream_with_retries(model_name, {'prompt': ai_feedback_prompt, 'temperature': 0.2}))
+        # Display input fields with values from session state
+        user_diagnosis = st.text_input("Enter your diagnosis:", value=st.session_state[diagnosis_key], key=diagnosis_key)
+        user_treatment_plan = st.text_input("Enter your suggested treatment plan:", value=st.session_state[treatment_key], key=treatment_key)
 
-        # Combine all parts of the AI feedback into one string
-        ai_feedback = ' '.join(ai_feedback_outputs)
+        # Button to submit the diagnosis and treatment plan
+        if st.button('Submit Diagnosis', key=f"submit_{case_index}"):
+            st.session_state[feedback_key] = generate_ai_feedback(case, user_diagnosis, user_treatment_plan)
 
-        # Display AI feedback in Streamlit
-        st.write("AI Feedback:", ai_feedback)
+        # Display AI feedback from session state
+        if st.session_state[feedback_key]:
+            st.markdown("AI Feedback:")
+            st.markdown(st.session_state[feedback_key])
 
-        # Log the performance for the current case
-        training_log_performance('Training-simulation', model_name, case, ai_feedback, test_count)
-
-        # Ensure that the next case has fresh input fields
         st.write("---")  # Visual separator for the next case
-        
+
+def generate_ai_feedback(case, user_diagnosis, user_treatment_plan):
+    # Construct the prompt for AI feedback
+    ai_feedback_prompt = construct_ai_prompt(case, user_diagnosis, user_treatment_plan)
+
+    # Generate AI feedback using the retry function to handle model streaming
+    ai_feedback_outputs = list(stream_with_retries(model_name, {'prompt': ai_feedback_prompt, 'temperature': 0.2}))
+    ai_feedback = ' '.join(ai_feedback_outputs).replace('  ', ' ')  # Remove extra spaces
+
+    # Log the performance for the current case
+    training_log_performance('Training-simulation', model_name, case, ai_feedback, test_count)
+
+    return ai_feedback
+
+def construct_ai_prompt(case, user_diagnosis, user_treatment_plan):
+    # Construct and return the AI feedback prompt
+    ai_feedback_prompt = (
+        f"Based on the patient information provided, analyze the potential causes of the reported side effects "
+        f"and the impact of the medical condition on the treatment. Then, provide feedback on the user's diagnosis "
+        f"and treatment plan.\n"
+        f"- **Medications**: {case['medications']}\n"
+        f"- **Reported Side Effects**: {case['side_effects']}\n"
+        f"- **Medical Condition**: {case['medical_condition']}\n\n"
+        f"**Actionable Steps**:\n"
+        f"- Succinctly suggest adjustment to the **dosage of {case['medications']}**.\n"
+        f"- Succinctly suggest a **monitoring duration** based on {case['side_effects']} and {case['medical_condition']}.\n\n"
+        f"- Succinctly suggest any potential adjustments to the medications treatment plan.\n"
+        f"Please review these suggestions with a healthcare professional."
+        f"generate a response following the above pattern in markdown"
+    )
+    return ai_feedback_prompt

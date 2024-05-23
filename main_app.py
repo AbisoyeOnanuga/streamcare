@@ -38,7 +38,7 @@ def main():
     """)
 
     # mode selection
-    mode = st.sidebar.radio("Choose the mode:", ["Synthetic Test", "Training Simulation", "User Interaction"])
+    mode = st.sidebar.radio("Choose the mode:", ["Synthetic Test", "Training Simulation", "Patient Diagnosis"])
 
     if 'ai_responses' not in st.session_state:
         st.session_state.ai_responses = []
@@ -46,7 +46,7 @@ def main():
     if mode == "Synthetic Test":
         # Synthetic test mode
         st.subheader('Synthetic Test Mode')
-        num_cases = st.slider('Number of synthetic cases:', min_value=1, value=25)
+        num_cases = st.slider('Number of synthetic cases:', min_value=1, max_value=10, value=3)
         if st.button('Run Synthetic Test'):
             with st.spinner('Running synthetic tests...'):
                 run_synthetic_test(num_cases, st)  # Pass the Streamlit context
@@ -54,14 +54,8 @@ def main():
 
     elif mode == "Training Simulation":
         st.subheader('Training Simulation Mode')
-        num_cases = st.slider('Number of training cases:', min_value=1, value=3)
+        num_cases = st.slider('Number of training cases:', min_value=1, max_value=10, value=3)
         run_simulation_button = st.button('Run Training Simulation')
-
-        # Use Streamlit's session state to store user inputs and AI responses
-        if 'user_inputs' not in st.session_state:
-            st.session_state.user_inputs = []
-        if 'ai_responses' not in st.session_state:
-            st.session_state.ai_responses = []
 
         if run_simulation_button:
             with st.spinner('Running training simulation...'):
@@ -70,12 +64,17 @@ def main():
                 st.success('Training simulation complete!')
 
         if st.button('Start New Training Simulation'):
-            st.session_state.user_inputs = []
-            st.session_state.ai_responses = []
-            # Reset any other states or variables if necessary
+            # Clear session state for a new simulation
+            clear_session_state()
 
-    elif mode == "User Interaction":
-        st.subheader('User Interaction Mode')
+        def clear_session_state():
+            # Function to clear session state
+            for key in list(st.session_state.keys()):
+                if 'diagnosis_' in key or 'treatment_' in key or 'ai_feedback_' in key:
+                    del st.session_state[key]
+
+    elif mode == "Patient Diagnosis":
+        st.subheader('Patient Diagnosis Mode')
         medications = st.text_input('Enter medications (separated by commas):')
         side_effects = st.text_input('Enter side effects (separated by commas):')
         medical_condition = st.text_input('Enter medical condition:')

@@ -28,10 +28,12 @@ def run_user_interaction(medications, side_effects, medical_condition, model_nam
             f"**Medications**: {medications}\n"
             f"**Reported Side Effects**: {side_effects}\n"
             f"**Medical Condition**: {medical_condition}\n\n"
-            f"**AI-Insights**:\n"
-            f"Generate a statistical analysis of the likelihood of the side effects being related to the medications \n\n"
             f"**Actionable Steps**:\n"
-            f"and suggest any potential adjustments to the medications treatment plan."
+            f"- Succinctly suggest adjustment to the **dosage of {medications}**.\n"
+            f"- Succinctly suggest a **monitoring duration** based on {side_effects} and {medical_condition}.\n\n"
+            f"- Succinctly suggest any potential adjustments to the medications treatment plan.\n"
+            f"Please review these suggestions with a healthcare professional."
+            f"generate a response following the above pattern in markdown"
         ),
         'temperature': 0.2
     }
