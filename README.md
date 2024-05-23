@@ -6,7 +6,7 @@ Streamcare is a cutting-edge application designed to revolutionize primary care 
 Clone the repository and install the required dependencies:
 
 ```
-git clone https://github.com/yourusername/streamcare.git
+git clone https://github.com/AbisoyeOnanuga/streamcare.git
 cd streamcare
 pip install -r requirements.txt
 pip install replicate  # Install the Replicate package
