@@ -1,2 +1,4 @@
 streamlit
 replicate
+python-dotenv == 1.0.0
+DateTime == 5.2
