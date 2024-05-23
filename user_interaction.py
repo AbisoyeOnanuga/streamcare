@@ -28,7 +28,7 @@ def run_user_interaction(medications, side_effects, medical_condition, model_nam
             f"**Medications**: {medications}\n"
             f"**Reported Side Effects**: {side_effects}\n"
             f"**Medical Condition**: {medical_condition}\n\n"
-            f"**Insights**:\n"
+            f"**AI-Insights**:\n"
             f"Generate a statistical analysis of the likelihood of the side effects being related to the medications \n\n"
             f"**Actionable Steps**:\n"
             f"and suggest any potential adjustments to the medications treatment plan."
