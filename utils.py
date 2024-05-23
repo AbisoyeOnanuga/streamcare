@@ -42,7 +42,7 @@ def log_performance(test_type, model_name, input_data, model_outputs, test_count
 # Function to log performance for training simulation
 def training_log_performance(test_type, model_name, input_data, model_outputs, test_count):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    log_message = "Test Type: {test_type} | Model: {model_name} | Test #{test_count} | Timestamp: {timestamp} | Input: {input_data} | Output: {model_outputs}"
+    log_message = f"Test Type: {test_type} | Model: {model_name} | Test #{test_count} | Timestamp: {timestamp} | Input: {input_data} | Output: {model_outputs}"
     training_logger.info(log_message)
     
 
