@@ -41,11 +41,9 @@ def log_performance(test_type, model_name, input_data, model_outputs, test_count
 
 # Function to log performance for training simulation
 def training_log_performance(test_type, model_name, input_data, model_outputs, test_count):
-    training_logger.info(f"Test Type: {test_type}")
-    training_logger.info(f"Model: {model_name}")
-    training_logger.info(f"Test Count: {test_count}")
-    training_logger.info(f"Input Data: {input_data}")
-    training_logger.info(f"Model Outputs: {model_outputs}")
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_message = "Test Type: {test_type} | Model: {model_name} | Test #{test_count} | Timestamp: {timestamp} | Input: {input_data} | Output: {model_outputs}"
+    training_logger.info(log_message)
     
 
 # Extended lists for synthetic data generation
@@ -86,6 +84,7 @@ def stream_with_retries(model_name, input_data, max_retries=3, backoff_factor=1)
                     yield event.data  # Yield each part of the model output as it is streamed
             break  # If successful, break out of the retry loop
         except Exception as e:
+            logging.exception(f"An error occurred while streaming: {e}")
             print(f"An error occurred: {e}")
             time.sleep(backoff_factor)  # Wait before retrying
             backoff_factor *= 2  # Exponential backoff
