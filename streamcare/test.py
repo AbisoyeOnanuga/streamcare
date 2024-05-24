@@ -20,12 +20,12 @@ input = {
         f"As an AI trained in pharmacology, analyze the potential drug-related causes of side effects and the "
         f"impact of the patient's medical condition on their treatment. Medications: {medications}. Reported "
         f"side effects: {side_effects}. Medical condition: {medical_condition}. Provide detailed insights that "
-        f"can aid healthcare professionals in making informed treatment decisions."
+        f"can aid healthcare professionals in making informed treatment decisions using markdown syntax."
     ),
     "temperature": 0.2
 }
 
-for event in replicate.stream(
+for event in replicate.run(
     "snowflake/snowflake-arctic-instruct",
     input=input
 ):
