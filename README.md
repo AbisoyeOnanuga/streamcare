@@ -2,7 +2,7 @@
 
 ![Streamcare thumbnail](https://github.com/AbisoyeOnanuga/streamcare/assets/102636953/d816558d-4712-4f6c-bb5b-e63b84d73631)
 
-Streamcare is an innovative application that integrates advanced AI to enhance primary care. It provides a platform for healthcare professionals to simulate medical scenarios, analyze medical conditions, and refine treatment plans using AI-generated insights.
+Streamcare is an prototype that aims to integrate AI to enhance primary care. It provides a platform for healthcare professionals to simulate medical scenarios, analyze medical conditions, and refine treatment plans using AI-generated insights.
 
 ## Table of Contents
 - [Installation](#installation)
